@@ -27,8 +27,7 @@ npx prisma db push                        # SQLite スキーマを反映
 - サンプルデータは付属しません。`npm run seed` は空の挙動で、動作確認後は不要です。
 
 ## 実行方法
-- 開発サーバー: `npm run dev` → http://localhost:3000
-- 本番ビルド: `npm run build && npm run start` → http://localhost:3000
+- WebUI: `npm run dev` → http://localhost:3000
 - Prisma Studio（データ確認）: `npx prisma studio`
 
 ## データ同期フロー（概要）

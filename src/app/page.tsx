@@ -7,17 +7,17 @@ import { ensureDatabaseConsistency } from "@/lib/server/ensureDatabaseConsistenc
 const COLORS = ["#2A72E5", "#8B5CF6", "#FACC15", "#26C485", "#E54D4D", "#F97316"];
 
 const SNAPSHOT_PORTFOLIO_CATEGORIES = [
-  { key: "stock", label: "����", color: "#2A72E5", keywords: ["����"] },
-  { key: "fund", label: "�����M��", color: "#8B5CF6", keywords: ["�����M��"] },
-  { key: "bond", label: "��", color: "#FACC15", keywords: ["��"] },
+  { key: "stock", label: "株式", color: "#2A72E5", keywords: ["株式"] },
+  { key: "fund", label: "投資信託", color: "#8B5CF6", keywords: ["投資信託"] },
+  { key: "bond", label: "債券", color: "#FACC15", keywords: ["債券"] },
   {
     key: "pension",
-    label: "�N��",
+    label: "年金",
     color: "#0EA5E9",
-    keywords: ["�m�苒�o", "�N��", "ideco", "iDeCo", "dc", "definedcontribution"]
+    keywords: ["確定拠出", "年金", "ideco", "iDeCo", "dc", "definedcontribution"]
   },
-  { key: "cash", label: "����", color: "#26C485", keywords: ["����", "�a��", "�L���b�V��"] },
-  { key: "other", label: "���̑�", color: "#E54D4D", keywords: [] }
+  { key: "cash", label: "現金", color: "#26C485", keywords: ["現金", "預金", "キャッシュ"] },
+  { key: "other", label: "その他", color: "#E54D4D", keywords: [] }
 ] as const;
 
 type SnapshotCategoryKey = (typeof SNAPSHOT_PORTFOLIO_CATEGORIES)[number]["key"];
@@ -699,7 +699,7 @@ export default async function Page() {
   const portfolioBase =
     snapshotPortfolio.length > 0 ? snapshotPortfolio : computePortfolioFromHoldings(holdings);
   const portfolio = portfolioBase.map((item) =>
-    item.name === "�N��" ? { ...item, profit: pensionProfitFromHoldings } : item
+    item.name === "年金" ? { ...item, profit: pensionProfitFromHoldings } : item
   );
 
   const trend = computeTrend(snapshots, accounts, holdings);

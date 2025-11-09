@@ -11,9 +11,14 @@ module.exports = {
       fontFamily: {
         sans: [
           "var(--font-sans)",
+          "var(--font-sans-jp)",
           "Manrope",
+          "Noto Sans JP",
           "Inter",
           "Segoe UI",
+          "Yu Gothic UI",
+          "Hiragino Sans",
+          "Meiryo",
           "system-ui",
           "-apple-system",
           "BlinkMacSystemFont",

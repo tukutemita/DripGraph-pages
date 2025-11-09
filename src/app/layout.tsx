@@ -1,5 +1,5 @@
 import "@/styles/globals.css";
-import { Manrope } from "next/font/google";
+import { Manrope, Noto_Sans_JP } from "next/font/google";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -8,9 +8,16 @@ const manrope = Manrope({
   variable: "--font-sans"
 });
 
+const notoSansJp = Noto_Sans_JP({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+  variable: "--font-sans-jp"
+});
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ja" className={manrope.variable} suppressHydrationWarning>
+    <html lang="ja" className={`${manrope.variable} ${notoSansJp.variable}`} suppressHydrationWarning>
       <body className="min-h-screen bg-background font-sans text-foreground antialiased">
         {children}
       </body>
