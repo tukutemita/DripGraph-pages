@@ -1,0 +1,102 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "windows", "linux-musl"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./data/app.db"
+}
+
+model Account {
+  id            String    @id @default(cuid())
+  name          String
+  provider      String
+  method        String
+  credentialRef String?
+  currency      String
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastSyncedAt  DateTime?
+  holdings      Holding[]
+  logs          SyncLog[]
+  snapshots     AccountSnapshot[]
+  holdingSnapshots HoldingSnapshot[]
+}
+
+model Holding {
+  id           String   @id @default(cuid())
+  accountId    String
+  symbol       String
+  name         String
+  quantity     Float
+  avgPrice     Float?
+  costAmount   Float?
+  marketValue  Float
+  currency     String
+  profitAmount Float?
+  profitRate   Float?
+  group        String?
+  lastSyncedAt DateTime @default(now())
+  Account      Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@unique([accountId, symbol])
+}
+
+model RateSnapshot {
+  id      String   @id @default(cuid())
+  base    String
+  quote   String
+  rate    Float
+  takenAt DateTime @default(now())
+}
+
+model EncryptedSecret {
+  id        String   @id @default(cuid())
+  name      String
+  payload   String
+  createdAt DateTime @default(now())
+}
+
+model SyncLog {
+  id        String   @id @default(cuid())
+  accountId String?
+  level     String
+  message   String
+  createdAt DateTime @default(now())
+  account   Account? @relation(fields: [accountId], references: [id], onDelete: SetNull)
+}
+
+model AccountSnapshot {
+  id          String   @id @default(cuid())
+  accountId   String
+  capturedAt  DateTime @default(now())
+  totalValue  Float
+  holdingsRaw Json
+  account     Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  holdingSnapshots HoldingSnapshot[]
+
+  @@index([accountId, capturedAt])
+}
+
+model HoldingSnapshot {
+  id           String   @id @default(cuid())
+  snapshotId   String
+  accountId    String
+  symbol       String
+  name         String
+  quantity     Float
+  avgPrice     Float?
+  costAmount   Float?
+  marketValue  Float
+  currency     String
+  profitAmount Float?
+  profitRate   Float?
+  group        String?
+  capturedAt   DateTime @default(now())
+  snapshot     AccountSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+  account      Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@index([accountId, capturedAt])
+  @@index([snapshotId])
+}
