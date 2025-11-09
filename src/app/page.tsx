@@ -322,6 +322,21 @@ const aggregatePensionProfitFromHoldings = (holdings: HoldingWithComputed[]) => 
   }, 0);
 };
 
+const dedupeSnapshotsByAccountDay = (snapshots: AccountSnapshotRecord[]) => {
+  const latestByAccountDay = new Map<string, AccountSnapshotRecord>();
+
+  snapshots.forEach((snapshot) => {
+    const dayKey = snapshot.capturedAt.toISOString().slice(0, 10);
+    const key = `${snapshot.accountId}-${dayKey}`;
+    const existing = latestByAccountDay.get(key);
+    if (!existing || existing.capturedAt < snapshot.capturedAt) {
+      latestByAccountDay.set(key, snapshot);
+    }
+  });
+
+  return Array.from(latestByAccountDay.values());
+};
+
 const computeTrend = (
   snapshots: Awaited<ReturnType<typeof prisma.accountSnapshot.findMany>>,
   accounts: AccountWithHoldings[],
@@ -403,8 +418,10 @@ const computeTrend = (
     accountKindById.set(account.id, kind);
   });
 
-  if (snapshots.length > 0) {
-    const sorted = [...snapshots].sort(
+  const snapshotsPerDay = snapshots.length > 0 ? dedupeSnapshotsByAccountDay(snapshots) : snapshots;
+
+  if (snapshotsPerDay.length > 0) {
+    const sorted = [...snapshotsPerDay].sort(
       (a, b) => a.capturedAt.getTime() - b.capturedAt.getTime()
     );
 

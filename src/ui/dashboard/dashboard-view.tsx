@@ -18,6 +18,15 @@ const TREND_LABEL_FORMATTER = new Intl.DateTimeFormat("ja-JP", {
   timeZone: "Asia/Tokyo"
 });
 
+const TREND_LABEL_YEAR_MONTH_FORMATTER = new Intl.DateTimeFormat("ja-JP", {
+  year: "numeric",
+  month: "short",
+  timeZone: "Asia/Tokyo"
+});
+
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+const ONE_YEAR_MS = 365 * ONE_DAY_MS;
+
 type PortfolioCategory = {
   name: string;
   value: number;
@@ -492,9 +501,11 @@ export function DashboardView(props: DashboardViewProps) {
       today.setHours(0, 0, 0, 0);
       const latestDate = new Date(latestPoint.date);
       latestDate.setHours(0, 0, 0, 0);
+
+      let extendedTrend = [...sortedTrend];
       if (!Number.isNaN(latestDate.getTime()) && today.getTime() > latestDate.getTime()) {
-        return [
-          ...sortedTrend,
+        extendedTrend = [
+          ...extendedTrend,
           {
             ...latestPoint,
             date: today.toISOString(),
@@ -503,7 +514,29 @@ export function DashboardView(props: DashboardViewProps) {
           }
         ];
       }
-      return sortedTrend;
+
+      const firstDate = extendedTrend[0] ? new Date(extendedTrend[0].date) : null;
+      const lastDate =
+        extendedTrend.length > 0 ? new Date(extendedTrend[extendedTrend.length - 1].date) : null;
+      const spanMs =
+        firstDate && lastDate && !Number.isNaN(firstDate.getTime()) && !Number.isNaN(lastDate.getTime())
+          ? lastDate.getTime() - firstDate.getTime()
+          : 0;
+
+      if (spanMs < ONE_YEAR_MS) {
+        return extendedTrend;
+      }
+
+      return extendedTrend.map((point) => {
+        const pointDate = new Date(point.date);
+        if (Number.isNaN(pointDate.getTime())) {
+          return point;
+        }
+        return {
+          ...point,
+          label: TREND_LABEL_YEAR_MONTH_FORMATTER.format(pointDate)
+        };
+      });
     }
 
     const endDate = new Date();
@@ -573,7 +606,6 @@ export function DashboardView(props: DashboardViewProps) {
     const timeline: TrendPoint[] = [];
     const lastKnown = { ...((lastSnapshotTotals ?? { total: 0, investment: 0, cash: 0 })) };
 
-    const ONE_DAY_MS = 24 * 60 * 60 * 1000;
     for (let time = startTime; time <= endTime; time += ONE_DAY_MS) {
       const current = new Date(time);
       const key = current.toISOString().slice(0, 10);
